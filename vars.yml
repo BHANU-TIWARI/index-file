@@ -1,0 +1,33 @@
+---
+  - hosts: all
+    vars:
+         web_pkg: httpd
+         firewall_pkg: firewalld
+
+    tasks: 
+           - name: install server
+             yum:
+                     name: '{{ web_pkg }}'
+                     state: latest
+        
+           - name: the {{ web_pkg }} service start
+             service:
+                  name: '{{ web_pkg }}'
+                  enabled: true
+                  state: started
+
+           - name: copy content client side
+             copy:
+                     src: ./index.html
+                     dest: /var/www/html/index.html
+             register: doc
+           - debug:
+                   var: doc
+
+           - name: add firewall port
+             firewalld:
+                     port: 80/tcp
+                     state: enabled
+                     permanent: yes
+                     immediate: yes
+
